@@ -21,4 +21,11 @@
 > 原来的 CatVodTVOfficial 的 CatVodTVSpider 项目，我不知道怎么调试，debug 不了，
 好在有 tvjar_test 项目，这个项目 java 可以直接运行 main 方法进行 debug 调试。
 
+5.配置接口
+> 配置地址：https://raw.githubusercontent.com/zhixc/CatVodTVSpider/main/tvbox_config.json
+> 
+> 加速地址: https://js.xxooo.ml/https://raw.githubusercontent.com/zhixc/CatVodTVSpider/main/tvbox_config.json
+> 
+> 加速地址2: https://ghproxy.net/https://raw.githubusercontent.com/zhixc/CatVodTVSpider/main/tvbox_config.json
 
+使用不了配置地址的话，可以试试加速地址。
