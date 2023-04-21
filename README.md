@@ -20,7 +20,5 @@
 4.一些额外的话：
 > 原来的 CatVodTVOfficial 的 CatVodTVSpider 项目，我不知道怎么调试，debug 不了，
 好在有 tvjar_test 项目，这个项目 java 可以直接运行 main 方法进行 debug 调试。
-debug 是真快乐。^_^
-
 
 
