@@ -4,6 +4,8 @@ import android.util.Base64;
 
 import com.github.catvod.crawler.SpiderDebug;
 
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.security.spec.AlgorithmParameterSpec;
 

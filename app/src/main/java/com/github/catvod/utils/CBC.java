@@ -1,7 +1,6 @@
 package com.github.catvod.utils;
 
 import com.github.catvod.crawler.SpiderDebug;
-
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
