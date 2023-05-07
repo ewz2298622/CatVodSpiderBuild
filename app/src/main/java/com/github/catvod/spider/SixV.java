@@ -1,15 +1,18 @@
 package com.github.catvod.spider;
 
+import android.content.Context;
 import com.github.catvod.crawler.Spider;
-import com.github.catvod.crawler.SpiderDebug;
 import com.github.catvod.utils.okhttp.OkHttpUtil;
-
+import okhttp3.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
 import org.jsoup.select.Elements;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 
@@ -19,135 +22,92 @@ import java.util.List;
  */
 public class SixV extends Spider {
 
-    private static final String siteUrl = "https://www.66s.cc";
+    private String siteUrl;
 
-    // 请求头部设置
     protected HashMap<String, String> getHeaders() {
         HashMap<String, String> headers = new HashMap<>();
-        headers.put("User-Agent",
-                "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36");
+        headers.put("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36");
         return headers;
     }
 
-    /**
-     * 首页内容
-     * @param filter 是否开启筛选
-     */
+    @Override
+    public void init(Context context, String extend) {
+        super.init(context, extend);
+        try {
+            if (null != extend && extend.startsWith("http")) {
+                if (extend.endsWith("/")) {
+                    extend = extend.substring(0, extend.lastIndexOf("/"));
+                }
+                siteUrl = extend;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public String homeContent(boolean filter) {
         try {
             JSONObject result = new JSONObject();
             JSONArray classes = new JSONArray();
 
-            JSONObject comedy = new JSONObject();
-            JSONObject actionMovie = new JSONObject();
-            JSONObject romanticMovie = new JSONObject();
-            JSONObject scientificMovie = new JSONObject();
-            JSONObject horrorMovie = new JSONObject();
-            JSONObject featureMovie = new JSONObject();
-            JSONObject warMovie = new JSONObject();
-            JSONObject documentary = new JSONObject();
-            JSONObject anime = new JSONObject();
-            JSONObject domesticDrama = new JSONObject();
-            JSONObject japaneseAndKoreanDramas = new JSONObject();
-            JSONObject europeanAndAmericanDramas = new JSONObject();
+            JSONObject movie = new JSONObject();
+            movie.put("type_id", "my_tid_movie");
+            movie.put("type_name", "电影");
 
-            comedy.put("type_id", "/xijupian");
-            comedy.put("type_name", "喜剧片");
-
-            actionMovie.put("type_id", "/dongzuopian");
-            actionMovie.put("type_name", "动作片");
-
-            romanticMovie.put("type_id", "/aiqingpian");
-            romanticMovie.put("type_name", "爱情片");
-
-            scientificMovie.put("type_id", "/kehuanpian");
-            scientificMovie.put("type_name", "科幻片");
-
-            horrorMovie.put("type_id", "/kongbupian");
-            horrorMovie.put("type_name", "恐怖片");
-
-            featureMovie.put("type_id", "/juqingpian");
-            featureMovie.put("type_name", "剧情片");
-
-            warMovie.put("type_id", "/zhanzhengpian");
-            warMovie.put("type_name", "战争片");
-
-            documentary.put("type_id", "/jilupian");
-            documentary.put("type_name", "纪录片");
-
-            anime.put("type_id", "/donghuapian");
-            anime.put("type_name", "动画片");
-
-            domesticDrama.put("type_id", "/dianshiju/guoju");
-            domesticDrama.put("type_name", "国产剧");
-
-            japaneseAndKoreanDramas.put("type_id", "/dianshiju/rihanju");
-            japaneseAndKoreanDramas.put("type_name", "日韩剧");
-
-            europeanAndAmericanDramas.put("type_id", "/dianshiju/oumeiju");
-            europeanAndAmericanDramas.put("type_name", "欧美剧");
-
-
-            classes.put(comedy);
-            classes.put(actionMovie);
-            classes.put(romanticMovie);
-            classes.put(scientificMovie);
-            classes.put(horrorMovie);
-            classes.put(featureMovie);
-            classes.put(warMovie);
-            classes.put(documentary);
-            classes.put(anime);
-            classes.put(domesticDrama);
-            classes.put(japaneseAndKoreanDramas);
-            classes.put(europeanAndAmericanDramas);
-
+            classes.put(movie);
             result.put("class", classes);
+            // filter 二级筛选 start
+            if (filter) {
+                String f = "{\"my_tid_movie\": [{\"key\": \"class\", \"name\": \"类型\", \"value\": [{\"n\": \"全部\", \"v\": \"\"}, {\"n\": \"喜剧片\", \"v\": \"xijupian\"}, {\"n\": \"动作片\", \"v\": \"dongzuopian\"}, {\"n\": \"爱情片\", \"v\": \"aiqingpian\"}, {\"n\": \"科幻片\", \"v\": \"kehuanpian\"}, {\"n\": \"恐怖片\", \"v\": \"kongbupian\"}, {\"n\": \"剧情片\", \"v\": \"juqingpian\"}, {\"n\": \"战争片\", \"v\": \"zhanzhengpian\"}, {\"n\": \"纪录片\", \"v\": \"jilupian\"}, {\"n\": \"动画片\", \"v\": \"donghuapian\"}]}]}";
+                JSONObject filterConfig = new JSONObject(f);
+                result.put("filters", filterConfig);
+            }
+            // filter 二级筛选 end
             return result.toString();
         } catch (Exception e) {
-            SpiderDebug.log(e);
+            e.printStackTrace();
         }
         return "";
     }
 
-    /**
-     * 分类页面
-     * @param tid   影片分类id值
-     * @param pg    第几页
-     * @param filter    二级筛选
-     */
+    @Override
     public String categoryContent(String tid, String pg, boolean filter, HashMap<String, String> extend) {
         try {
 
             JSONObject result = new JSONObject();
             JSONArray jSONArray = new JSONArray();
 
-            // 第一页
-            // https://www.66s.cc/xijupian
-            // 第二页
-            // https://www.66s.cc/xijupian/index_2.html
-            String cateUrl = siteUrl + tid;
-            if (!pg.equals("1")){
+            // 筛选处理 start
+            HashMap<String, String> ext = new HashMap<>();
+            if (extend != null && extend.size() > 0) {
+                ext.putAll(extend);
+            }
+            String classType = ext.get("class") == null ? "" : ext.get("class");
+            // 筛选处理 end
+
+            String cateUrl = siteUrl + "/" + classType;
+            if (!pg.equals("1")) {
                 cateUrl += "/index_" + pg + ".html";
             }
             String content = OkHttpUtil.string(cateUrl, getHeaders());
 
             Elements list_el = Jsoup.parse(content)
-                                .select("#post_container")
-                                .select("[class=zoom]");
+                    .select("#post_container")
+                    .select("[class=zoom]");
 
             for (int i = 0; i < list_el.size(); i++) {
                 JSONObject vod = new JSONObject();
                 Element item = list_el.get(i);
-                String vod_id = item.attr("href");
-                String vod_name = item.attr("title");
-                String vod_pic = item.select("img").attr("src");
-//                String vod_remarks = item.select(".pic-text").text();
-                vod.put("vod_id", siteUrl + vod_id);
-                vod.put("vod_name", vod_name);
-                vod.put("vod_pic", vod_pic);
-//                vod.put("vod_remarks", vod_remarks);
+                String vid = siteUrl + item.attr("href");
+                String name = item.attr("title");
+                String pic = item.select("img").attr("src");
+                String remark = "";
+                vod.put("vod_id", vid);
+                vod.put("vod_name", name);
+                vod.put("vod_pic", pic);
+                vod.put("vod_remarks", remark);
                 jSONArray.put(vod);
-
             }
             result.put("page", Integer.parseInt(pg));
             result.put("pagecount", Integer.MAX_VALUE);
@@ -155,16 +115,13 @@ public class SixV extends Spider {
             result.put("total", Integer.MAX_VALUE);
             result.put("list", jSONArray);
             return result.toString();
-
         } catch (Exception e) {
-            SpiderDebug.log(e);
+            e.printStackTrace();
         }
         return "";
     }
 
-    /**
-     * 详情页
-     */
+    @Override
     public String detailContent(List<String> ids) {
         try {
             JSONObject result = new JSONObject();
@@ -180,35 +137,23 @@ public class SixV extends Spider {
             // 另外磁力链接的播放，即使返回到首页，不在播放页面了，磁力依旧在后台继续下载
             // 以上这些问题估计只能考 TVBox 的作者去解决了。
 
-            String vod_play_url = ""; // 线路/播放源 里面的各集的播放页面链接
+            StringBuilder vod_play_url = new StringBuilder(); // 线路/播放源 里面的各集的播放页面链接
             String vod_play_from = "";  // 线路 / 播放源标题
             for (int i = 0; i < sources.size(); i++) {
-                int b = i + 1;
-//                vod_play_from = vod_play_from + "源" + b + "$$$";
                 vod_play_from = vod_play_from + "magnet" + "$$$";
 
                 Elements aElemntArray = sources.get(i).select("table").select("a");
                 for (int j = 0; j < aElemntArray.size(); j++) {
-                    if (!vod_play_url.equals("")){
-                        // 如果已经有一条磁力链接了，那么退出for循环
-                        // 因为多条磁力链接，TVBox 似乎不会识别播放
-                        break;
-                    }
+                    // 如果已经有一条磁力链接了，那么退出for循环
+                    // 因为多条磁力链接，TVBox 似乎不会识别播放
+                    if (!vod_play_url.toString().equals("")) break;
+
                     String href = aElemntArray.get(j).attr("href");
-                    if (!href.startsWith("magnet")){
-                        // 不是磁力链接，略过
-                        continue;
-                    }
-                    if (j < aElemntArray.size() - 1) {
-                        // 磁力链接不需要拼接 siteUrl，因为已经是直链了
-                        // 不是最后一集的通用写法
-                        vod_play_url = vod_play_url + aElemntArray.get(j).text() + "$"
-                               + href + "#";
-                    } else {
-                        // 最后一集要特殊处理
-                        vod_play_url = vod_play_url + aElemntArray.get(j).text() + "$"
-                                + href + "$$$";
-                    }
+                    String text = aElemntArray.get(j).text();
+                    if (!href.startsWith("magnet")) continue;
+                    vod_play_url.append(text).append("$").append(href);
+                    boolean notLastEpisode = j < aElemntArray.size() - 1;
+                    vod_play_url.append(notLastEpisode ? "#" : "$$$");
                 }
             }
 
@@ -228,69 +173,113 @@ public class SixV extends Spider {
             info.put("vod_name", title);
             info.put("vod_pic", pic);
 
+            // -------------------- 选填部分 start --------------------
+            Document document = Jsoup.parse(content);
+            List<TextNode> textNodes = document.select("#post_content").get(0).select("p").get(0).textNodes();
+            String typeName = "";
+            String year = "";
+            String area = "";
+            String remark = "";
+            String actor = "";
+            String director = "";
+            String brief = "";
+            if (textNodes.size() >= 13) {
+                typeName = textNodes.get(5).text().substring(6);
+                year = textNodes.get(3).text().substring(6);
+                area = textNodes.get(4).text().substring(6);
+                remark = textNodes.get(9).text().substring(6);
+                actor = textNodes.get(13).text().substring(6);
+                director = textNodes.get(10).text().substring(6);
+            }
+            List<TextNode> textNodes2 = document.select("#post_content").get(0).select("p").get(1).textNodes();
+            if (textNodes2.size() > 1) {
+                brief = textNodes2.get(1).text();
+            }
+
+            info.put("type_name", typeName);
+            info.put("vod_year", year);
+            info.put("vod_area", area);
+            info.put("vod_remarks", remark);
+            info.put("vod_actor", actor);
+            info.put("vod_director", director);
+            info.put("vod_content", brief);
+            // -------------------- 选填部分 end ---------------------
+
             info.put("vod_play_from", vod_play_from);
-            info.put("vod_play_url", vod_play_url);
+            info.put("vod_play_url", vod_play_url.toString());
 
             list_info.put(info);
             result.put("list", list_info);
 
             return result.toString();
         } catch (Exception e) {
-            SpiderDebug.log(e);
+            e.printStackTrace();
         }
         return "";
     }
 
-    /**
-     * 搜索
-     * @param key   关键字/词
-     * @param quick     是否允许在播放页面发起快捷搜索
-     */
+
+    @Override
     public String searchContent(String key, boolean quick) {
         try {
+            String url = siteUrl + "/e/search/index.php";
+            JSONArray videos = new JSONArray();
 
-            // https://www.66s.cc/e/search/index.php
-            /*String url = siteUrl + "/e/search/index.php";
-            JSONObject searchResult = new JSONObject(OkHttpUtil.string(url, getHeaders()));
-            JSONObject result = new JSONObject();
-            JSONArray videoInfo = new JSONArray();
-            if (searchResult.getInt("total") > 0) {
-                JSONArray lists = searchResult.getJSONArray("list");
-                for (int i = 0; i < lists.length(); i++) {
-                    JSONObject vod = lists.getJSONObject(i);
-                    String id = siteUrl + "/voddetail/" + vod.getInt("id");
-                    String title = vod.getString("name");
-                    String cover = vod.getString("pic");
-                    JSONObject v = new JSONObject();
-                    v.put("vod_id", id);
-                    v.put("vod_name", title);
-                    v.put("vod_pic", cover);
-                    v.put("vod_remarks", "");
-                    videoInfo.put(v);
-                }
+            RequestBody formBody = new FormBody.Builder()
+                    .add("show", "title")
+                    .add("tempid", "1")
+                    .add("tbname", "article")
+                    .add("mid", "1")
+                    .add("dopost", "search")
+                    .add("submit", "")
+                    .addEncoded("keyboard", URLEncoder.encode(key, "utf8"))
+                    .build();
+
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(formBody)
+                    .build();
+
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Response response = okHttpClient.newCall(request).execute();
+            String content = response.body().string();
+            response.close(); // 关闭响应资源
+            Document doc = Jsoup.parse(content);
+            Elements list_el = doc.select("#post_container")
+                    .select("[class=zoom]");
+            for (int i = 0; i < list_el.size(); i++) {
+                JSONObject vod = new JSONObject();
+                Element item = list_el.get(i);
+                String vid = siteUrl + item.attr("href");
+                String name = item.attr("title").replaceAll("</?[^>]+>", "");
+                String pic = item.select("img").attr("src");
+                vod.put("vod_id", vid);
+                vod.put("vod_name", name);
+                vod.put("vod_pic", pic);
+                vod.put("vod_remarks", "");
+                videos.put(vod);
             }
-            result.put("list", videoInfo);
-            return result.toString();*/
 
+            JSONObject result = new JSONObject();
+            result.put("list", videos);
+            return result.toString();
         } catch (Exception e) {
-            SpiderDebug.log(e);
+            e.printStackTrace();
         }
         return "";
     }
 
+    @Override
     public String playerContent(String flag, String id, List<String> vipFlags) {
         try {
             JSONObject result = new JSONObject();
-
-//            result.put("parse", 0);
-            result.put("parse", 1);
+            result.put("parse", 0);
             result.put("header", "");
             result.put("playUrl", "");
             result.put("url", id);
             return result.toString();
-
         } catch (Exception e) {
-            SpiderDebug.log(e);
+            e.printStackTrace();
         }
         return "";
     }
