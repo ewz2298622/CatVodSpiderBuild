@@ -136,7 +136,7 @@ public class Czsapp extends Spider {
     public String categoryContent(String str, String str2, boolean z, HashMap<String, String> hashMap) {
         try {
             JSONObject jSONObject = new JSONObject();
-            Document doc = Jsoup.parse(OkHttpUtil.string("https://czzy01.com/" + str + "/page/" + str2, Headers()));
+            Document doc = Jsoup.parse(OkHttpUtil.string("https://czzy.pro/" + str + "/page/" + str2, Headers()));
             int parseInt = Integer.parseInt(str2);
             int parseInt2 = Integer.parseInt(str2);
                 Matcher matcher = I.matcher(doc.select("div.pagenavi_txt > a.extend").last().attr("href"));
@@ -179,7 +179,7 @@ public class Czsapp extends Spider {
             JSONObject jSONObject = new JSONObject();
             JSONArray jSONArray = new JSONArray();
             JSONObject jSONObject2 = new JSONObject();
-            Document doc = Jsoup.parse(OkHttpUtil.string("https://czzy01.com/movie/" + list.get(0) + ".html", Headers()));
+            Document doc = Jsoup.parse(OkHttpUtil.string("https://czzy.pro/movie/" + list.get(0) + ".html", Headers()));
             String trim = doc.select("div.moviedteail_tt > h1").text().trim();
             String pY2 = doc.select("div.dyimg > img").attr("src");
             Iterator<Element> it = doc.select("ul.moviedteail_list > li").iterator();
@@ -243,7 +243,7 @@ public class Czsapp extends Spider {
         try {
 
             JSONObject jSONObject = new JSONObject();
-            Document doc = Jsoup.parse(OkHttpUtil.string("https://czzy01.com", Headers()));
+            Document doc = Jsoup.parse(OkHttpUtil.string("https://czzy.pro", Headers()));
             Elements jS = doc.select(".navlist > li > a");
             JSONArray jSONArray = new JSONArray();
             for (Element next : jS) {
@@ -295,7 +295,7 @@ public class Czsapp extends Spider {
         String str4;
         Elements G8;
         try {
-            String K2 = OkHttpUtil.string("https://czzy01.com/v_play/" + str2 + ".html", Headers());
+            String K2 = OkHttpUtil.string("https://czzy.pro/v_play/" + str2 + ".html", Headers());
             Document UR = Jsoup.parse(K2);
             Matcher matcher = Y.matcher(K2);
             if (matcher.find()) {
@@ -401,7 +401,7 @@ public class Czsapp extends Spider {
     public String searchContent(String str, boolean z) {
         try {
             JSONObject jSONObject = new JSONObject();
-            Elements jS = Jsoup.parse(OkHttpUtil.string("https://czzy01.com/xssearch?q=" + URLEncoder.encode(str), Headers())).select("div.mi_ne_kd > ul > li");
+            Elements jS = Jsoup.parse(OkHttpUtil.string("https://czzy.pro/xssearch?q=" + URLEncoder.encode(str), Headers())).select("div.mi_ne_kd > ul > li");
             JSONArray jSONArray = new JSONArray();
             for (Element next : jS) {
                 Matcher matcher = Db.matcher(next.select("a").attr("href"));
