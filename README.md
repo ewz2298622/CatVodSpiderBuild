@@ -20,7 +20,7 @@
 4.配置接口
 > 配置地址：https://raw.githubusercontent.com/zhixc/CatVodTVSpider/main/tvbox_config.json
 > 
-> 加速地址: https://cdn.jsdelivr.net/gh/zhixc/CatVodTVSpider@main/tvbox_config.json
+> 加速地址: https://ghproxy.com/https://raw.githubusercontent.com/zhixc/CatVodTVSpider/main/tvbox_config.json
 > 
 > 加速地址2: https://ghproxy.net/https://raw.githubusercontent.com/zhixc/CatVodTVSpider/main/tvbox_config.json
 
